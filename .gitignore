@@ -1,0 +1,21 @@
+# Haskell build artifacts
+dist-newstyle/
+dist/
+.stack-work/
+cabal.sandbox.config
+.cabal-sandbox/
+
+# Output binaries
+*.exe
+*.o
+*.hi
+*.chi
+*.dyn_o
+*.dyn_hi
+
+# IDE/Editor files
+.vscode/
+*.swp
+
+# Reports (если не хочешь хранить ворд в репо, раскомментируй)
+# *.docx
