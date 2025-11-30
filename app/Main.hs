@@ -10,10 +10,6 @@ import Data.Int (Int32)
 import Control.Monad (forM_, when)
 import System.IO (hFlush, stdout, stdin, hSetEncoding, utf8)
 
--- ==========================================
--- 1. DATA MODELS & INSTANCES
--- ==========================================
-
 class FromRow a where
     fromRow :: [MySQLValue] -> Maybe a
 
@@ -50,14 +46,10 @@ instance FromRow UsageStat where
         Just $ UsageStat { usUser = u, usRole = r, usSoftName = s, usTime = t }
     fromRow _ = Nothing
 
--- ==========================================
--- 2. DATABASE HELPERS
--- ==========================================
-
 getConnInfo :: ConnectInfo
 getConnInfo = defaultConnectInfo {
     ciUser = "root",
-    ciPassword = "root", -- <--- ПАРОЛЬ!
+    ciPassword = "root",
     ciDatabase = "faculty_network",
     ciHost = "127.0.0.1"
 }
@@ -67,10 +59,6 @@ fetchData conn q = do
     (_, stream) <- query_ conn q
     rawRows <- Streams.toList stream
     return [ x | Just x <- map fromRow rawRows ]
-
--- ==========================================
--- 3. ACTIONS (Logic)
--- ==========================================
 
 showAllSoftware :: MySQLConn -> IO ()
 showAllSoftware conn = do
@@ -131,11 +119,10 @@ addSoftware conn = do
     _ <- executeStmt conn stmt [MySQLText (pack name), MySQLText (pack ver), MySQLInt32 (read authId), MySQLInt32 (read typeId)]
     putStrLn "Successfully added!"
 
--- [НОВОЕ] Функция редактирования
 updateSoftware :: MySQLConn -> IO ()
 updateSoftware conn = do
     putStrLn "\n--- EDIT SOFTWARE ---"
-    showAllSoftware conn -- Сначала показываем список, чтобы видеть ID
+    showAllSoftware conn
     
     putStr "Enter ID to edit: "
     hFlush stdout
@@ -155,7 +142,6 @@ updateSoftware conn = do
     _ <- executeStmt conn stmt [MySQLText (pack name), MySQLText (pack ver), MySQLInt32 (read sId)]
     putStrLn "Successfully updated!"
 
--- [НОВОЕ] Функция удаления
 deleteSoftware :: MySQLConn -> IO ()
 deleteSoftware conn = do
     putStrLn "\n--- DELETE SOFTWARE ---"
@@ -171,18 +157,14 @@ deleteSoftware conn = do
     _ <- executeStmt conn stmt [MySQLInt32 (read sId)]
     putStrLn "Successfully deleted!"
 
--- ==========================================
--- 4. MAIN LOOP
--- ==========================================
-
 menuLoop :: MySQLConn -> IO ()
 menuLoop conn = do
     putStrLn "\n============================"
     putStrLn "1. Show all software"
     putStrLn "2. Show usage statistics"
     putStrLn "3. Add new software"
-    putStrLn "4. Edit software"   -- Новый пункт
-    putStrLn "5. Delete software" -- Новый пункт
+    putStrLn "4. Edit software"
+    putStrLn "5. Delete software"
     putStrLn "0. Exit"
     putStrLn "============================"
     putStr "Select action: "
